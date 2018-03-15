@@ -13,8 +13,13 @@
       </div>
       <div class="content-right">
         <div class="pay" :class="payClass">
-          ￥{{minPrice}}元起送
+          {{payDesc}}
         </div>
+      </div>
+    </div>
+    <div class="ball-container">
+      <div v-for="(ball, index) in balls" v-show="ball.show" :key="index" class="ball">
+        <div class="inner inner-hook"></div>
       </div>
     </div>
   </div>
@@ -37,6 +42,80 @@ export default {
       default: 0
     }
   },
+  data() {
+    return {
+      balls: [
+        {
+          show: false
+        },
+        {
+          show: false
+        },
+        {
+          show: false
+        },
+        {
+          show: false
+        },
+        {
+          show: false
+        }
+      ],
+      dropBall: []
+    }
+  },
+  methods: {
+    drop(el) {
+      for (let i = 0; i < this.balls.length; i++) {
+        let ball = this.balls[i];
+        if (!ball.show) {
+          ball.show = true;
+          ball.el = el;
+          this.dropBall.push(ball);
+          return;
+        }
+      }
+    }
+  },
+  transition: {
+    drop: {
+      beforeEnter(el) {
+        let count = this.balls.length;
+        while (count--) {
+          let ball = this.balls[count];
+          if (ball.show) {
+            let rect = ball.el.getBoundingClientRect();
+            let x = rect.left - 32;
+            let y = -(window.innerHeight - rect.top-22);
+            el.style.display = '';
+            el.style.webkitTransform = `translate3d(0, ${y}px, 0)`;
+            el.style.transform = `translate3d(0, ${y}px, 0)`;
+            let inner = el.getElementsByClassName('inner-hook')[0];
+            inner.style.webkitTransform = `translate3d(${x}px, 0, 0)`;
+            inner.style.transform = `translate3d(${x}px, 0, 0)`;
+          }
+        }
+      },
+      enter(el) {
+        /* eslint-disable no-unused-vars */
+        let rf = el.offsetHeight;
+        this.$nextTick(() => {
+          el.style.webkitTransform = 'translate3d(0, 0, 0)';
+          el.style.transform = 'translate3d(0, 0, 0)';
+          let inner = el.getElementsByClassName('inner-hook')[0];
+          inner.style.webkitTransform = 'translate3d(0, 0, 0)';
+          inner.style.transform = 'translate3d(0, 0, 0)';
+        })
+      },
+      afterEnter(el) {
+        let ball = this.dropBall.shift();
+        if (ball) {
+          ball.show = false;
+          el.style.display = 'none';
+        }
+      }
+    }
+  },
   computed: {
     totalPrice() {
       let total = 0;
@@ -55,7 +134,7 @@ export default {
     payDesc() {
       if (this.totalPrice === 0) {
         return `￥${this.minPrice}元起送`;
-      } else if (totalPrice < minPrice) {
+      } else if (this.totalPrice < this.minPrice) {
         let diff = this.minPrice - this.totalPrice
         return `还差￥${diff}元起送`;
       } else {
@@ -73,6 +152,10 @@ export default {
 }
 </script>
 <style lang="stylus">
+  .fade-enter-active, .fade-leave-active
+    transition: opacity .5s
+  .fade-enter, .fade-leave-to
+    opacity: 0;
   .shopcart
     position: fixed
     left: 0
@@ -163,4 +246,15 @@ export default {
           &.enough
             background: #00b43c
             color: #fff
+    .ball-container
+      .ball
+        position: fixed
+        left: 32px
+        bottom: 22px
+        z-index: 200
+        .inner
+          width: 16px
+          height: 16px
+          border-radius: 50%
+          background: rgb(0, 160, 220)
 </style>
