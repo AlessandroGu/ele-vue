@@ -14,7 +14,7 @@
       <li v-for="(item, index) in goods" :key="index" class="food-list food-list-hook">
         <h1 class="title">{{item.name}}</h1>
         <ul>
-          <li v-for="(item, index) in item.foods" :key="index" class="food-item border-1px">
+          <li @click="selectFood(item, $event)" v-for="(item, index) in item.foods" :key="index" class="food-item border-1px">
             <div class="icon">
               <img width="57" height="57" :src="item.icon" alt="">
             </div>
@@ -37,7 +37,8 @@
       </li>
     </ul>
   </div>
-  <shopcart :select-foods="selectFoods" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice"></shopcart>
+  <shopcart ref:shopcart :select-foods="selectFoods" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice"></shopcart>
+  <food :item="selectedFood" ref="food"></food>
 </div>
 </template>
 
@@ -45,6 +46,7 @@
 import Bscroll from "better-scroll";
 import shopcart from "../shopcart/shopcart.vue";
 import cartcontrol from "../cartcontrol/cartcontrol.vue";
+import food from "../food/food.vue";
 
 export default {
   props: {
@@ -56,7 +58,8 @@ export default {
     return {
       goods: [],
       listHeight: [],
-      scrollY: 0
+      scrollY: 0,
+      selectedFood: {}
     }
   },
   computed: {
@@ -99,8 +102,14 @@ export default {
   },
   components: {
     shopcart,
-    cartcontrol
+    cartcontrol,
+    food
   },
+  // events: {
+  //   'cart.add'(target) {
+  //     this._drop(target);
+  //   }
+  // }
   methods: {
     _initScroll() {
       this.menuScroll = new Bscroll(this.$refs.menuWrapper, {
@@ -131,7 +140,17 @@ export default {
       let foodList = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook');
       let el = foodList[index]
       this.foodsScroll.scrollToElement(el, 300);
+    },
+    selectFood(item, event) {
+      if (!event._constructed) {
+        return;
+      }
+      this.selectedFood = item;
+      this.$refs.food.show();
     }
+    // _drop(target) {
+    //   this.$refs.shopcart.drop(target);
+    // }
   }
 }
 </script>
