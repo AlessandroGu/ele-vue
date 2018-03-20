@@ -47,7 +47,6 @@ import Bscroll from "better-scroll";
 import shopcart from "../shopcart/shopcart.vue";
 import cartcontrol from "../cartcontrol/cartcontrol.vue";
 import food from "../food/food.vue";
-
 export default {
   props: {
     seller: {
@@ -87,7 +86,6 @@ export default {
   },
   created() {
     this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee']
-
     this.$http.get('/api/goods').then((response) => {
       response = response.data;
       if (response.errno === 0) {
@@ -156,7 +154,6 @@ export default {
 </script>
 <style lang="stylus">
 @import "../../common/stylus/mixin.styl" 
-
 .goods
   display: flex
   position: absolute

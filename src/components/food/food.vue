@@ -1,5 +1,5 @@
 <template>
-<transition name="fold">
+<transition name="move">
   <div class="food" v-show="showFlag" ref="food">
     <div class="food-content">
       <div class="image-header">
@@ -15,15 +15,14 @@
               <span class="rating">好评率{{item.rating}}%</span>
           </div>
           <div class="price">
-              <span class="now">{{item.price}}</span>
+              <span class="now">￥{{item.price}}</span>
               <span class="old" v-show="item.oldPrice">{{item.oldPrice}}</span>
           </div>
+          <div class="cartcontrol-wrapper">
+            <cartcontrol :item="item"></cartcontrol>
+          </div>
+          <div class="buy" @click.stop.prevent="addFirst($event)" v-show="!item.count || item.count === 0">加入购物车</div>
       </div>
-      <div class="cartcontrol-wrapper">
-        <cartcontrol :item="item"></cartcontrol>
-      </div>
-      <div class="buy" @click.stop.prevent="addFirst($event)" v-show="!item.count || item.count === 0">加入购物车</div>
-    </div>
     <split v-show="item.info"></split>
     <div class="info">
         <h1 class="title">商品信息</h1>
@@ -32,7 +31,7 @@
     <split></split>
     <div class="rating">
         <h1 class="title">商品评价</h1>
-        <ratingselect :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="item.ratings"></ratingselect>
+        <ratingselect :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="item.ratings" @rstType="rstType" @contToggle="contToggle"></ratingselect>
         <div class="rating-wrapper">
             <ul v-show="item.ratings && item.ratings.length">
                 <li v-show="needShow(item.rateType, item.text)" v-for="(item, index) in item.ratings" :key="index" class="rating-item">
@@ -48,6 +47,7 @@
             </ul>
             <div class="no-rating" v-show="!item.ratings || !item.ratings.length">暂无评价</div>
         </div>
+      </div>  
     </div>
   </div>
 </transition>
@@ -56,12 +56,12 @@
 const POSITIVE = 0;
 const NEGATIVE = 1;
 const ALL = 2;
-import BScroll from "better-scroll";
+import Bscroll from "better-scroll";
 import Vue from "vue";
 import cartcontrol from "../cartcontrol/cartcontrol.vue"
 import split from "../split/split.vue"
 import ratingselect from "../ratingselect/ratingselect.vue"
-import formatDate from "../../common/js/formatDate"
+import {formatDate} from "../../common/js/date.js"
 export default {
   props: {
     item: {
@@ -71,8 +71,8 @@ export default {
   data() {
     return {
       showFlag: false,
-      selectType: All,
-      onlyContent: true,
+      selectType: ALL,
+      onlyContent: false,
       desc: {
         all: '全部',
         positive: '推荐',
@@ -80,7 +80,7 @@ export default {
       }
     }
   },
-  filter: {
+  filters: {
     formatDate(time) {
       let date = new Date(time);
       return formatDate(date, 'yyyy-MM-dd hh:mm');
@@ -94,11 +94,11 @@ export default {
   methods: {
     show() {
       this.showFlag = true;
-      this.selectType = 2;
+      this.selectType = ALL;
       this.onlyContent = true;
       this.$nextTick(() => {
         if (!this.scroll) {
-          this.scroll = new BScroll(this.$refs.food, {
+          this.scroll = new Bscroll(this.$refs.food, {
             click: true
           })
         } else {
@@ -113,7 +113,7 @@ export default {
       if (!event._constructed) {
         return;
       }
-      this.$emit('cart.add', event.target);
+      this.$root.eventHub.$emit('cart.add', event.target); // 传输点击的目标元素
       Vue.set(this.item, 'count', 1);
     },
     needShow(type, text) {
@@ -125,16 +125,14 @@ export default {
       } else {
         return type === this.selectType;
       }
-    }
-  },
-  events: {
-    'ratingtype.select'(type) {
+    },
+    rstType(type) {
       this.selectType = type;
       this.$nextTick(() => {
         this.scroll.refresh();
       })
     },
-    'content.toggle'(onlyContent) {
+    contToggle(onlyContent) {
       this.onlyContent = onlyContent;
       this.$nextTick(() => {
         this.scroll.refresh();
@@ -153,12 +151,11 @@ export default {
     top: 0
     bottom: 48px
     z-index: 30
-    .fold-enter-active, .fold-leave-active 
-      transition: all .5s;
-    .fold-enter-active, .fold-leave-active
-      transform: translate3d(100%, 0, 0);
-    .fold-enter, .fold-leave
-      transform: translate3d(0, 0, 0);
+    transition:all 0.3s
+    &.move-enter-active
+      transform:translate3d(0,0,0)
+    &.move-enter,&.move-leave-to
+      transform:translate3d(100%,0,0)
     .image-header
       position: relative
       width: 100%

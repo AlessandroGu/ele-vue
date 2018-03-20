@@ -17,7 +17,6 @@
 </template>
 <script>
 import header from './components/header/header.vue'
-
 export default {
   data() {
     return {
@@ -45,7 +44,6 @@ export default {
 </script>
 <style lang="stylus" rel="stylesheet/stylus">
   @import "./common/stylus/mixin.styl"
-
   #app
     .tab
       display: flex
