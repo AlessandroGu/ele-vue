@@ -22,12 +22,13 @@
         <div class="inner inner-hook"></div>
       </div>
     </div>
+    <transition name="fold">
     <div class="shopcart-list" v-show="listShow">
       <div class="list-header">
         <h1 class="title">购物车</h1>
         <span class="empty" @click="empty">清空</span>
       </div>
-      <div class="list-content" ref="list-content">
+      <div class="list-content" ref="listContent">
         <ul>
           <li class="food" v-for="(item, index) in selectFoods" :key="index">
             <span class="name">{{item.name}}</span>
@@ -41,6 +42,10 @@
         </ul>
       </div>
     </div>
+    </transition>
+    <transition name="maskMove">
+      <div class="mask" v-show="listShow" @click.stop.prevent="hideList"></div>
+    </transition>
   </div>
 </template>
 <script>
@@ -323,11 +328,18 @@ export default {
           border-radius: 50%
           background: rgb(0, 160, 220)
     .shopcart-list
-      position: absolute
-      top: 0
-      left: 0
-      z-index: -1
-      width: 100%
+      position:absolute
+      left:0
+      top:0
+      z-index:-1
+      width:100%
+      transform:translate3d(0,-100%,0)
+      &.fold-enter-active,&.fold-leave-active
+        transition:all 0.5s;
+      &.fold-leave-active
+        transform:translate3d(0,-100%,0)      
+      &.fold-enter,&.fold-leave-active
+        transform:translate3d(0,0,0)
       .list-header
         height: 40px
         line-height: 40px
@@ -368,11 +380,20 @@ export default {
             position: absolute
             right: 0
             bottom: 6px
-  .list-mast
-    position: fixed
-    top: 0
-    left: 0
-    width: 100%
-    height: 100%
-    z-index: 40
+    .mask
+      width:100%
+      height:100%
+      position:fixed
+      left:0
+      top:0
+      background:rgba(7,17,27,0.6)
+      // filter:blur(10px)
+      // backdrop-filter:blur(10px)
+      z-index:-2
+      &.maskMove-enter-active,&.maskMove-leave-active
+        transition:all 0.5s;
+      &.maskMove-enter
+        opacity:1
+      &.maskMove-leave-active
+        opacity:0
 </style>
