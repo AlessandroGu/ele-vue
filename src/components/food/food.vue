@@ -178,6 +178,7 @@ export default {
           color: white
     .content
       padding: 18px
+      position: relative
       .title
         line-height: 14px
         margin-bottom: 8px

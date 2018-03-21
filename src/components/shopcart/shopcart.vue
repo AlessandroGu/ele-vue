@@ -366,7 +366,7 @@ export default {
           border-1px(rgba(7, 17, 27, 0.1))
           .name
             line-height: 24px
-            fong-size: 14px
+            font-size: 14px
             color: rgb(7, 17, 27)
           .price
             position: absolute
