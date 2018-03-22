@@ -1,5 +1,5 @@
 <template>
-  <div class="seller" ref="seller">
+  <div class="seller" ref="sellerWrapper">
     <div class="seller-content">
       <div class="overview">
         <h1 class="title">{{seller.name}}</h1>
@@ -28,7 +28,7 @@
             </div>
           </li>
         </ul>
-        <div class="favorite" @click="toggleFavorite($event)">
+        <div class="favorite" @click="toggleFavorite">
           <span class="icon-favorite" :class="{'active': favorite}"></span>
           <span class="text">{{favoriteText}}</span>
         </div>
@@ -49,8 +49,8 @@
       <split></split>
       <div class="pics">
         <h1 class="title">商家实景</h1>
-        <div class="pic-wrapper" ref="pic-wrapper">
-          <ul class="pic-list" ref="pic-list">
+        <div class="pic-wrapper" ref="picWrapper">
+          <ul class="pic-list" ref="picList">
             <li class="pic-item" v-for="(pic, index) in seller.pics" :key="index">
               <img :src="pic" width="120" height="90">
             </li>
@@ -82,8 +82,8 @@ export default {
   data() {
     return {
       favorite: (() => {
-        return loadFromLocal(this.seller.id, 'favorite', false)();
-      })
+        return loadFromLocal(this.seller.id, 'favorite', false);
+      })()
     }
   },
   computed: {
@@ -101,22 +101,21 @@ export default {
   mounted() {
     this.$nextTick(() => {
       this._initScroll();
+      this.__initPics();
     })
   },
   watch: {
     'seller'() {
       this.$nextTick(() => {
         this._initScroll();
-      });
-      this.$nextTick(() => {
         this._initPics();
-      })
+      });
     }
   },
   methods: {
     _initScroll() {
       if (!this.scroll) {
-        this.scroll = new BScroll(this.$ref.seller, {
+        this.scroll = new BScroll(this.$refs.sellerWrapper, {
           click: true
         })
       } else {
@@ -130,11 +129,16 @@ export default {
         let width = (picWidth + margin) * this.seller.pics.length - margin;
         this.$refs.picList.style.width = width + 'px';
         this.$nextTick(() => {
-          this.picScroll = new BScroll(this.$refs.picWrapper, {
-            scrollX: true,
-            eventPassthrough: 'vertical'
-          })
+          if (!this.picScroll) {
+            this.picScroll = new BScroll(this.$refs.picWrapper, {
+              scrollX: true,
+              eventPassthrough: 'vertical',
+              click: true
+            })
+          }
         })
+      } else {
+        this.pics.refresh();
       }
     },
     toggleFavorite(event) {
@@ -144,9 +148,6 @@ export default {
       this.favorite = !this.favorite;
       saveToLocal(this.seller.id, 'favorite', this.favorite);
     }
-  },
-  ready() {
-    
   }
 }
 </script>
